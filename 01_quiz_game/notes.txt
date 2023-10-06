@@ -1,0 +1,7 @@
+Learn abaout goroutine, use sync waitgroup, 
+- link https://www.youtube.com/watch?v=IVaq7BApx8I
+
+
+This is a underradar web that I missed:
+https://dasarpemrogramangolang.novalagung.com/A-timer-ticker-scheduler.html
+

@@ -2,24 +2,51 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
-type csvContent struct {
-	question   string
-	realAnswer int
+func main() {
+	// declare flag
+	var csvFileName = flag.String("csv_name", "problems.csv", "type the csv file's name")
+	var timeLimit = flag.Int("time_limit", 30, "type the maximal time limit")
+	flag.Parse()
+
+	// var userAnswer int
+	var userScore int
+	// chanellf or flag if the time is done
+	timeUp := make(chan bool)
+
+	// call the quiz engine function
+	go func() {
+		quizEngine(*csvFileName, &userScore)
+		fmt.Printf("User final score: %v", userScore)
+		os.Exit(0)
+	}()
+
+	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
+
+	select {
+	case <-timer.C:
+		// this C will block aftet 30
+		fmt.Print("\nTime is Up.\n")
+		fmt.Printf("User final score: %v", userScore)
+		os.Exit(0)
+	case <-timeUp:
+		timer.Stop()
+	}
+
+	// fmt.Printf("User final score: %v", userScore)
 }
 
-func main() {
-	var userAnswer int
-	var userScore int
-
+func quizEngine(csvFileName string, userScore *int) {
 	// open csv file
-	f, err := os.Open("problems.csv")
+	f, err := os.Open(csvFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,6 +56,8 @@ func main() {
 
 	// read csv values
 	csvReader := csv.NewReader(f)
+	// fmt.Printf("type f %T", csvReader)
+
 	for {
 		// csv Read return string slice
 		recOneLine, err := csvReader.Read()
@@ -40,25 +69,24 @@ func main() {
 		}
 
 		// the question and real answer
-		fmt.Printf("%v ", recOneLine[0])
+		fmt.Printf("%v = ", recOneLine[0])
 		realAnswer, err := strconv.Atoi(recOneLine[1])
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// scan the answer
+		var userAnswer int
 		fmt.Scan(&userAnswer)
 
 		// check answer
 		if userAnswer == realAnswer {
-			userScore++
+			*userScore++
 		}
 
 		clearInputBuffer()
-
 	}
 
-	fmt.Printf("User final score: %v", userScore)
 }
 
 // function for clearing input buffer

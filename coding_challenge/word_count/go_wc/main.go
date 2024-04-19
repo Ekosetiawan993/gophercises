@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 func main() {
@@ -27,6 +28,12 @@ func main() {
 	} else if args[1] == "-l" {
 		numberOfLines := countLines(inputContent)
 		fmt.Printf("%d %v", numberOfLines, filename)
+	} else if args[1] == "-m" {
+		numberOfLines := countCharacters(inputContent)
+		fmt.Printf("%d %v", numberOfLines, filename)
+	} else if args[1] == "-L" {
+		maxLineLength := calculateMaxLineLength(inputContent)
+		fmt.Printf("%d %v", maxLineLength, filename)
 	} else {
 		numberOfBytes := countBytes(inputContent)
 		numberOfWords := countWords(inputContent)
@@ -86,4 +93,22 @@ func countWords(content []byte) int64 {
 	}
 
 	return int64(totalWords)
+}
+
+func countCharacters(content []byte) int64 {
+	return int64(utf8.RuneCount(content))
+}
+
+func calculateMaxLineLength(content []byte) int64 {
+	if len(content) == 0 {
+		return int64(0)
+	}
+	lines := strings.Split(string(content), "\n")
+	maxLength := 0
+	for _, line := range lines {
+		if len(line) > maxLength {
+			maxLength = len(line)
+		}
+	}
+	return int64(maxLength)
 }

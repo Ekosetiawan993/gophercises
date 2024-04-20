@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"unicode/utf8"
@@ -11,12 +12,27 @@ func main() {
 	// filename := "one_word_line.txt"
 	args := os.Args
 
-	if len(args) < 3 {
+	inputTerminal, _ := os.Stdin.Stat()
+
+	if (inputTerminal.Mode() & os.ModeCharDevice) == 0 {
+		inputContentOs, _ := io.ReadAll(os.Stdin)
+
+		numberOfBytes := countBytes(inputContentOs) - 2
+		numberOfWords := countWords(inputContentOs)
+		numberOfLines := countLines(inputContentOs)
+		fmt.Printf("\t%v\t%v\t%v", numberOfLines, numberOfWords, numberOfBytes)
+
+		return
+	} else if len(args) < 3 {
 		fmt.Printf("go_wc: %v: go_wc need at least three arguments", args)
 		os.Exit(1)
 	}
+	// else {
+	// 	inputContent = readFile(args[2])
+	// 	filename = args[2]
+	// }
 
-	filename := args[2]
+	filename := args[len(args)-1]
 	inputContent := readFile(filename)
 
 	if args[1] == "-c" {
@@ -112,3 +128,9 @@ func calculateMaxLineLength(content []byte) int64 {
 	}
 	return int64(maxLength)
 }
+
+// if (inputTerminal.Mode() & os.ModeCharDevice) == 0 {
+// 	fmt.Println("input from terminal", inputTerminal.Mode(), os.ModeCharDevice)
+// 	inputString, _ := io.ReadAll(os.Stdin)
+// 	fmt.Println(string(inputString))
+// }

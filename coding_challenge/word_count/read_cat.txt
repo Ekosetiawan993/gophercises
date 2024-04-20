@@ -1,0 +1,40 @@
+package read_cat
+
+import (
+	"bufio"
+	"fmt"
+	"io"
+	"log"
+	"os"
+)
+
+func Read_cat() {
+	// check whether or not we get input from stdin
+	inputContent, err := os.Stdin.Stat()
+	errorHandler(err)
+	if (inputContent.Mode() & os.ModeCharDevice) == 1 {
+		fmt.Println("input from file a.k.a not from terminal")
+	} else {
+		fmt.Println("Possibly got input from terminal or cat command")
+		// Create a buffered reader for os.Stdin
+		scanner := bufio.NewScanner(os.Stdin)
+
+		// Try peeking at the input to see if there is any data available
+		// _, err := reader.Peek(1)
+		if !scanner.Scan() {
+			// No input is available
+			fmt.Println("No input available from terminal.")
+			return
+		}
+
+		inputString, err := io.ReadAll(os.Stdin)
+		errorHandler(err)
+		fmt.Println(string(inputString))
+	}
+}
+
+func errorHandler(err error) {
+	if err != nil {
+		log.Fatalf("Error: %v", err.Error())
+	}
+}
